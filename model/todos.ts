@@ -4,7 +4,7 @@ import { getSupabaseClient } from '~/lib/superbase'
 export interface Todo {
   id: number
   title: string
-  completed: boolean
+  is_completed: boolean
   created_at: Date
   user_id: string
 }
@@ -15,7 +15,6 @@ export const useTodos = () => {
   const supabase = getSupabaseClient()
 
   // 查询所有todos
-  console.log('getTodos 1');
   const getTodos = async () => {
     const { data, error } = await supabase
       .from('todos')
@@ -49,11 +48,11 @@ export const useTodos = () => {
   }
 
   // 更新todo状态
-  const updateTodo = async (id: number, completed: boolean) => {
+  const updateTodo = async (id: string, is_completed: boolean) => {
     const { data, error } = await supabase
       .from('todos')
       .update({ 
-        completed,
+        is_completed,
         updated_at: new Date()
       })
       .eq('id', id)

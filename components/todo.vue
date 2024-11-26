@@ -63,6 +63,6 @@ const emit = defineEmits<{
 }>();
 
 const toggleCompleted = () => {
-    emit('update:completed', !props.todo.is_completed);
+    emit('update:completed', props.todo.id, !props.todo.is_completed);
 }
 </script>

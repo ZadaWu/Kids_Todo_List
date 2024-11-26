@@ -5,7 +5,7 @@ import { useTodos as useBaseTodos } from "~/services/todos";
 interface Todo {
   id: number;
   title: string;
-  completed: boolean;
+  is_completed: boolean;
 }
 // 这是一个Vue的组合式函数(Composable),用于管理todos的状态和操作
 export const useTodos = () => {

@@ -35,16 +35,16 @@ export const useTodos = () => {
   }
 
   // 更新todo状态，添加参数验证
-  const updateTodo = async (id: number, completed: boolean) => {
-    if (typeof id !== 'number' || id <= 0) {
+  const updateTodo = async (id: string, is_completed: boolean) => {
+    if (typeof id !== 'string') {
       throw new Error('Invalid todo id')
     }
-    if (typeof completed !== 'boolean') {
+    if (typeof is_completed !== 'boolean') {
       throw new Error('Completed status must be boolean')
     }
 
     try {
-      return await baseTodos.updateTodo(id, completed)
+      return await baseTodos.updateTodo(id, is_completed)
     } catch (error) {
       console.error('Service error updating todo:', error)
       throw error
