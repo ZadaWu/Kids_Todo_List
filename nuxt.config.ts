@@ -9,12 +9,13 @@ export default defineNuxtConfig({
     }
   },
   modules: [
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/tailwindcss'
   ],
   buildModules: [
     // 仅支持 Nuxt 2:
     // https://composition-api.nuxtjs.org/getting-started/setup#quick-start
     '@nuxtjs/composition-api/module',
     '@pinia/nuxt',
-  ],
+  ]
 })

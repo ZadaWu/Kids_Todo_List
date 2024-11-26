@@ -30,8 +30,18 @@
 </script>
 
 <template>
-    <div>
-        <input type="text" v-model="title" placeholder="Add a new todo" />
-        <button @click="addTodo">Add</button>
-    </div>
+  <div class="mb-4 flex gap-2">
+    <input 
+      type="text" 
+      v-model="title" 
+      placeholder="Add your task" 
+      class="flex-1 rounded-md border border-gray-300 px-4 py-2 focus:border-red-400 focus:outline-none"
+    />
+    <button 
+      @click="addTodo"
+      class="rounded-md bg-red-400 px-6 py-2 text-white hover:bg-red-500"
+    >
+      ADD
+    </button>
+  </div>
 </template>
