@@ -1,19 +1,19 @@
 <script setup>
-  import { ref, onMounted } from "vue";
-  import { getSupabaseClient } from "@/lib/superbase";
+  import AddTodos from "@/components/addTodos.vue";
   import EmptyList from "@/components/emptyList.vue";
-  const supabase = getSupabaseClient();
-  const todos = ref([]);
-  async function fetchTodos() {
-    const { data, error } = await supabase.from("todos").select("*").order("created_at", { ascending: false });
-    if(error) {
-      console.error(error);
-      return
-    }
-    todos.value = data;
-  }
+  import TodoList from "@/components/todoList.vue";
+  import { useTodos } from '~/hooks/useTodos'
+  import { useTodosStore } from '~/state/todosStore'
+  import { storeToRefs } from 'pinia';
 
-  fetchTodos();
+  const { fetchTodos } = useTodos();
+  const store = useTodosStore()
+  const {todos: todosStore} = storeToRefs(store);
+
+  onMounted(async () => {
+    const initTodos = await fetchTodos();
+    store.setTodos(initTodos);
+  })
 </script>
 
 <template>
@@ -21,10 +21,9 @@
     <NuxtRouteAnnouncer />
     <div class="todo-container">
       <h1>Todo List</h1>
-      <EmptyList v-if="todos.length === 0">No todos found</EmptyList>
-      <ul v-else>
-        <li v-for="todo in todos" :key="todo.id">{{ todo.title }}</li>
-      </ul>
+      <AddTodos />
+      <EmptyList v-if="todosStore.length === 0">No todos found</EmptyList>
+      <TodoList/>
     </div>
   </div>
 </template>

@@ -7,5 +7,14 @@ export default defineNuxtConfig({
         supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
         supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY
     }
-  }
+  },
+  modules: [
+    '@pinia/nuxt'
+  ],
+  buildModules: [
+    // 仅支持 Nuxt 2:
+    // https://composition-api.nuxtjs.org/getting-started/setup#quick-start
+    '@nuxtjs/composition-api/module',
+    '@pinia/nuxt',
+  ],
 })
