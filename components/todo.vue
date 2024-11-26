@@ -25,7 +25,7 @@
     </span>
     
     <button 
-      @click="emit('edit', todo.id)"
+      @click="emit('remove', todo.id)"
       class="ml-auto opacity-0 group-hover:opacity-100"
     >
       <svg
@@ -59,7 +59,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
     'update:completed': [boolean]
-    'edit': [number]
+    'remove': [number]
 }>();
 
 const toggleCompleted = () => {

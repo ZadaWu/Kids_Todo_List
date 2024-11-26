@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Todo v-for="todo in todos" :key="todo.id" :todo="todo" @update:completed="handleUpdateCompleted" @edit="handleRemoveTodo" />
+        <Todo v-for="todo in todos" :key="todo.id" :todo="todo" @update:completed="handleUpdateCompleted" @remove="handleRemoveTodo" />
     </div>
 </template>
 
@@ -26,7 +26,14 @@
         }
     }
 
-    const handleRemoveTodo = (id) => {
-        store.removeTodo(id);
+    const handleRemoveTodo = async (id) => {
+        let originTodo = store.removeTodo(id);
+        try {
+            await todosService.deleteTodo(id);
+        } catch (error) {
+            // 乐观更新，如果删除失败，则恢复原状态
+            store.addTodo(originTodo);
+            console.error('Error deleting todo:', error);
+        }
     }
 </script>

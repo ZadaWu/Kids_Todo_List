@@ -52,8 +52,8 @@ export const useTodos = () => {
   }
 
   // 删除todo，添加参数验证
-  const deleteTodo = async (id: number) => {
-    if (typeof id !== 'number' || id <= 0) {
+  const deleteTodo = async (id: string) => {
+    if (typeof id !== 'string') {
       throw new Error('Invalid todo id')
     }
 

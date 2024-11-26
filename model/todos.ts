@@ -67,7 +67,7 @@ export const useTodos = () => {
   }
 
   // 删除todo
-  const deleteTodo = async (id: number) => {
+  const deleteTodo = async (id: string) => {
     const { error } = await supabase
       .from('todos')
       .delete()
