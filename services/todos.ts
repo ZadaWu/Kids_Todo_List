@@ -17,7 +17,7 @@ export const useTodos = () => {
   }
 
   // 创建todo，添加标题验证
-  const addTodo = async ({title, is_completed, created_at}: {title: string, is_completed: boolean, created_at: Date}) => {
+  const addTodo = async ({title, is_completed, created_at, list_id}: {title: string, is_completed: boolean, created_at: Date, list_id: number}) => {
     // 验证标题
     if (!title || title.trim().length === 0) {
       throw new Error('Todo title cannot be empty')
@@ -27,7 +27,7 @@ export const useTodos = () => {
     }
 
     try {
-      return await baseTodos.addTodo({title, is_completed, created_at})
+      return await baseTodos.addTodo({title, is_completed, created_at, list_id})
     } catch (error) {
       console.error('Service error adding todo:', error)
       throw error

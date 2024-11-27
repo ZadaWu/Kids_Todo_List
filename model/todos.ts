@@ -29,13 +29,14 @@ export const useTodos = () => {
   }
 
   // 创建新的todo
-  const addTodo = async ({title, is_completed, created_at}: {title: string, is_completed: boolean, created_at: Date}) => {
+  const addTodo = async ({title, is_completed, created_at, list_id}: {title: string, is_completed: boolean, created_at: Date, list_id: number }) => {
     const { data, error } = await supabase
       .from('todos')
       .insert([{ 
         title,
         is_completed,
-        created_at: created_at
+        created_at: created_at,
+        list_id
       }])
       .select()
       .single()

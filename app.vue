@@ -1,7 +1,7 @@
 <script setup>
-  import AddTodos from "@/components/addTodos.vue";
   import EmptyList from "@/components/emptyList.vue";
-  import TodoList from "@/components/todoList.vue";
+  import Lists from "@/components/lists.vue";
+  import AddList from "@/components/addList.vue";
   import { useTodos } from '~/hooks/useTodos'
   import { useTodosStore } from '~/state/todosStore'
   import { storeToRefs } from 'pinia';
@@ -18,12 +18,11 @@
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900">
-    <div class="w-[400px] rounded-lg bg-white p-6 shadow-xl">
-      <h1 class="mb-6 text-2xl font-bold">To-Do List 📝</h1>
-      <AddTodos />
+  <div class="flex flex-col min-h-screen items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900">
+    <AddList />
+    <div class="w-[1200px] rounded-lg bg-white p-6 shadow-xl">
       <EmptyList v-if="todosStore.length === 0">No todos found</EmptyList>
-      <TodoList/>
+      <Lists />
     </div>
   </div>
 </template>

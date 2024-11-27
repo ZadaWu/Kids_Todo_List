@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Todo v-for="todo in todos" :key="todo.id" :todo="todo" @update:completed="handleUpdateCompleted" @remove="handleRemoveTodo" />
+        <Todo v-for="todo in oneListTodos" :key="todo.id" :todo="todo" @update:completed="handleUpdateCompleted" @remove="handleRemoveTodo" />
     </div>
 </template>
 
@@ -8,13 +8,29 @@
     import { storeToRefs } from 'pinia'
     import { useTodosStore } from '~/state/todosStore'
     import { useTodos as useTodosService } from  '~/services/todos'
+
+
+    const props = defineProps({
+        listId: {
+            type: Number,
+            required: true
+        },
+        listName: {
+            type: String,
+            required: true
+        }
+    })
+
     const todosService = useTodosService();
     
     import Todo from './todo.vue';
 
     const store = useTodosStore()
     const {todos} = storeToRefs(store);
+    
+    const oneListTodos = computed(() => todos.value.filter((todo) => todo.list_id === props.listId))
 
+    console.log('oneListTodos', oneListTodos.value);
     const handleUpdateCompleted = async (id, completed) => {
         store.completeTodo(id, completed);
         try {

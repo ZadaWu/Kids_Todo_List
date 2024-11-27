@@ -8,14 +8,20 @@
     // 返回的是 store 实例，可以访问 state、getters 和 actions
     import { useTodos as useTodosService } from '~/services/todos'
     const todosService = useTodosService();
-
     const title = ref('');
+    const props = defineProps({
+        listId: {
+            type: Number,
+            required: true
+        }
+    })
     const addTodo = async () => {
         const newTodo = {
             title: title.value,
             is_completed: false,
             created_at: new Date(),
-            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            list_id: props.listId
         }
         useTodosStore().addTodo(newTodo);
         try {
