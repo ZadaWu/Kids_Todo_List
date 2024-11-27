@@ -34,6 +34,7 @@
     const handleUpdateCompleted = async (id, completed) => {
         store.completeTodo(id, completed);
         try {
+            console.log('id', id, 'completed', completed)
             await todosService.updateTodo(id, completed);
         } catch (error) {
             // 乐观更新，如果更新失败，则恢复原状态

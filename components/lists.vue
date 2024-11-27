@@ -20,8 +20,7 @@ onMounted(async () => {
              :key="list?.id" 
              class="w-[350px] p-6 rounded-lg list-card">
             <div class="list-header">
-                <h1 class="mb-2 text-2xl font-bold">To-Do List 📝</h1>
-                <h2 class="mb-4 text-lg text-gray-600">{{ list?.name }}</h2>
+                <h1 class="mb-2 text-2xl font-bold">{{ list?.name }} 📝</h1>
             </div>
             <AddTodos :listId="list?.id" />
             <TodoList :listId="list?.id" :listName="list?.name" />

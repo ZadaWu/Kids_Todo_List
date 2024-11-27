@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 interface Todo {
-    id: number;
+    id: string;
     title: string;
     is_completed: boolean;
 }
