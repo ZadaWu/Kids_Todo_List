@@ -20,9 +20,17 @@
       </svg>
     </div>
     
-    <span :class="{ 'line-through text-gray-400': todo.is_completed }">
-      {{ todo.title }}
-    </span>
+    <div class="flex items-center gap-2">
+      <Icon 
+        v-if="matchedIcon"
+        :icon="matchedIcon" 
+        class="text-xl transition-transform hover:scale-110" 
+        :style="{ color: iconColor }"
+      />
+      <span :class="{ 'line-through text-gray-400': todo.is_completed }">
+        {{ todo.title }}
+      </span>
+    </div>
     
     <button 
       @click="emit('remove', todo.id)"
@@ -45,6 +53,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Icon } from '@iconify/vue'
+import {iconMap} from '~/lib/iconMap'
+
 interface Todo {
     id: string;
     title: string;
@@ -56,13 +68,28 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
 const emit = defineEmits<{
     'update:completed': [boolean]
-    'remove': [number]
+    'remove': [string]
 }>();
 
+const matchedIcon = ref('')
+const iconColor = ref('')
+
+
+
 const toggleCompleted = () => {
-    emit('update:completed', props.todo.id, !props.todo.is_completed);
+    emit('update:completed', !props.todo.is_completed);
 }
+
+// 匹配图标
+onMounted(() => {
+  for (const [key, value] of Object.entries(iconMap)) {
+    if (props.todo.title.includes(key)) {
+      matchedIcon.value = value.icon
+      iconColor.value = value.color
+      break
+    }
+  }
+})
 </script>
