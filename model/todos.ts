@@ -1,91 +1,88 @@
-import { getSupabaseClient } from '~/lib/superbase'
+import { collection, getDocs, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore'
 
-// 定义Todo类型接口
 export interface Todo {
-  id: number
-  title: string
-  is_completed: boolean
-  created_at: Date
-  user_id: string
+    id: string
+    title: string
+    is_completed: boolean
+    created_at: Date
+    list_id: string
 }
 
-// 创建todos相关的CRUD操作
 export const useTodos = () => {
-  // 获取Supabase客户端实例
-  const supabase = getSupabaseClient()
+    const { $firebaseDb: db } = useNuxtApp()
+    const todosCollection = collection(db, 'todos')
 
-  // 查询所有todos
-  const getTodos = async () => {
-    const { data, error } = await supabase
-      .from('todos')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching todos:', error)
-      throw error
+    const getTodos = async () => {
+        try {
+            const querySnapshot = await getDocs(todosCollection)
+            return querySnapshot.docs.map(doc => {
+                console.log(19, 'todo doc data:', doc.data());
+                return {
+                    id: doc.id,
+                    ...doc.data(),
+                    created_at: doc.data().created_at?.toDate()
+                }
+            }) as Todo[]
+        } catch (error) {
+            console.error('Error fetching todos:', error)
+            throw error
+        }
     }
-    return data as Todo[]
-  }
 
-  // 创建新的todo
-  const addTodo = async ({title, is_completed, created_at, list_id}: {title: string, is_completed: boolean, created_at: Date, list_id: number }) => {
-    const { data, error } = await supabase
-      .from('todos')
-      .insert([{ 
-        title,
-        is_completed,
-        created_at: created_at,
-        list_id
-      }])
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error adding todo:', error)
-      throw error
+    const addTodo = async ({ title, is_completed, created_at, list_id }: { title: string, is_completed: boolean, created_at: Date, list_id: string }) => {
+        try {
+            const docRef = await addDoc(todosCollection, {
+                title,
+                is_completed,
+                created_at,
+                list_id: doc(db, 'lists', list_id)
+            })
+            
+            return {
+                id: docRef.id,
+                title,
+                is_completed,
+                created_at,
+                list_id
+            } as Todo
+        } catch (error) {
+            console.error('Error adding todo:', error)
+            throw error
+        }
     }
-    return data as Todo
-  }
 
-  // 更新todo状态
-  const updateTodo = async (id: string, is_completed: boolean) => {
-    const { data, error } = await supabase
-      .from('todos')
-      .update({ 
-        is_completed,
-        updated_at: new Date()
-      })
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error updating todo:', error)
-      throw error
+    const updateTodo = async (id: string, is_completed: boolean) => {
+        try {
+            const docRef = doc(db, 'todos', id)
+            await updateDoc(docRef, { 
+                is_completed,
+                updated_at: new Date()
+            })
+            return {
+                id,
+                is_completed,
+                updated_at: new Date()
+            } as Partial<Todo>
+        } catch (error) {
+            console.error('Error updating todo:', error)
+            throw error
+        }
     }
-    return data as Todo
-  }
 
-  // 删除todo
-  const deleteTodo = async (id: string) => {
-    const { error } = await supabase
-      .from('todos')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting todo:', error)
-      throw error
+    const deleteTodo = async (id: string) => {
+        try {
+            const docRef = doc(db, 'todos', id)
+            await deleteDoc(docRef)
+        } catch (error) {
+            console.error('Error deleting todo:', error)
+            throw error
+        }
     }
-  }
 
-  // 返回所有CRUD操作方法
-  return {
-    getTodos,
-    addTodo, 
-    updateTodo,
-    deleteTodo
-  }
+    return {
+        getTodos,
+        addTodo,
+        updateTodo,
+        deleteTodo
+    }
 }
-

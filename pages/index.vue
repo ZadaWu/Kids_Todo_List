@@ -1,12 +1,53 @@
+<script setup>
+import { useAuth } from '~/composables/useAuth'
+
+const { user, signOut } = useAuth()
+
+const handleSignOut = async () => {
+  try {
+    await signOut()
+    // 可以添加退出成功的提示
+  } catch (error) {
+    console.error('退出失败:', error)
+  }
+}
+</script>
+
 <template>
   <div>
     <!-- 导航栏 -->
     <nav class="flex justify-between items-center px-8 py-4">
       <div class="text-2xl font-bold">FamilyTodo</div>
-      <div>
-        <NuxtLink to="/login" class="px-6 py-2 rounded-md border border-gray-300">
-          登录
-        </NuxtLink>
+      <div class="flex items-center gap-4">
+        <template v-if="user">
+          <span class="text-gray-600">{{ user.email }}</span>
+          <button 
+            @click="handleSignOut"
+            class="px-6 py-2 rounded-md border border-gray-300 hover:bg-gray-50"
+          >
+            退出
+          </button>
+          <NuxtLink 
+            to="/todos" 
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            我的待办
+          </NuxtLink>
+        </template>
+        <template v-else>
+          <NuxtLink 
+            to="/login" 
+            class="px-6 py-2 rounded-md border border-gray-300 hover:bg-gray-50"
+          >
+            登录
+          </NuxtLink>
+          <NuxtLink 
+            to="/register" 
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            注册
+          </NuxtLink>
+        </template>
       </div>
     </nav>
 

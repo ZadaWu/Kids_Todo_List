@@ -1,52 +1,74 @@
-import { getSupabaseClient } from '~/lib/superbase'
+import { collection, getDocs, addDoc, deleteDoc, updateDoc, doc } from 'firebase/firestore'
 
-// 定义Todo类型接口
 export interface List {
-    id: number
+    id: string  // Firebase 使用 string 类型的 ID
     name: string
     created_at: Date
 }
 
 export const useLists = () => {
-    const supabase = getSupabaseClient()
+    const { $firebaseDb: db } = useNuxtApp()
+    const listsCollection = collection(db, 'lists')
 
     const getLists = async () => {
-        const { data, error } = await supabase.from('lists').select('*')
-
-        if (error) {
+        try {
+            const querySnapshot = await getDocs(listsCollection)
+            console.log(16, querySnapshot);
+            return querySnapshot.docs.map(doc => {
+                console.log('doc data:', doc.data(), doc.id);
+                return {
+                    id: doc.id,
+                    ...doc.data(),
+                    created_at: doc.data().created_at?.toDate() // Firestore Timestamp 转 Date
+                }
+            }) as List[]
+        } catch (error) {
             console.error('Error fetching lists:', error)
             throw error
         }
-        return data as List[]
     }
 
-    const addList = async ({name}: {name: string}) => {
-        const { data, error } = await supabase.from('lists').insert({name})
-
-        if (error) {
+    const addList = async ({ name }: { name: string }) => {
+        try {
+            const docRef = await addDoc(listsCollection, {
+                name,
+                created_at: new Date()
+            })
+            
+            return {
+                id: docRef.id,
+                name,
+                created_at: new Date()
+            } as List
+        } catch (error) {
             console.error('Error adding list:', error)
             throw error
         }
-        return data as List
     }
 
-    const deleteList = async (id: number) => {
-        const { error } = await supabase.from('lists').delete().eq('id', id)
-
-        if (error) {
+    const deleteList = async (id: string) => {
+        try {
+            const docRef = doc(db, 'lists', id)
+            await deleteDoc(docRef)
+        } catch (error) {
             console.error('Error deleting list:', error)
             throw error
         }
     }
 
-    const updateList = async (id: number, name: string) => {
-        const { data, error } = await supabase.from('lists').update({name}).eq('id', id)
-
-        if (error) {
+    const updateList = async (id: string, name: string) => {
+        try {
+            const docRef = doc(db, 'lists', id)
+            await updateDoc(docRef, { name })
+            return {
+                id,
+                name,
+                created_at: new Date() // 如果需要保持原始创建时间，需要先获取文档
+            } as List
+        } catch (error) {
             console.error('Error updating list:', error)
             throw error
         }
-        return data as List
     }
 
     return {

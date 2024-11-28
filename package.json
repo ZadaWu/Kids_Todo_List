@@ -15,6 +15,7 @@
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.7.0",
     "@supabase/supabase-js": "^2.46.1",
+    "firebase": "^11.0.2",
     "nuxt": "^3.14.1592",
     "pinia": "^2.2.6",
     "vue": "latest",

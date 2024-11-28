@@ -1,9 +1,22 @@
 <script setup>
+import { useAuth } from '~/composables/useAuth'
+import { onMounted, onUnmounted } from 'vue'
+const { $firebaseAuth } = useNuxtApp()
+import { onAuthStateChanged } from 'firebase/auth'
 
+const { user } = useAuth()
+
+// 监听用户状态
+onMounted(() => {
+  // const unsubscribe = onAuthStateChanged($firebaseAuth, (firebaseUser) => {
+  //   user.value = firebaseUser
+  // })
+
+})
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen items-center justify-center bg-gradient-to-br from-amber-50 to-rose-100">
+  <NuxtLayout>
     <NuxtPage />
-  </div>
+  </NuxtLayout>
 </template>
