@@ -13,40 +13,43 @@ export const useAuth = () => {
   const user = useState<any | null>('user', () => null)
   const { $firebaseAuth } = useNuxtApp()
   
+  // 保存用户信息到 Redis (通过 API)
+  const saveUserToRedis = async (firebaseUser: any) => {
+    try {
+      console.log(31, 'saveUserToRedis')
+      const response = await fetch('/api/users/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+          provider: firebaseUser.providerData[0]?.providerId || 'anonymous',
+        })
+      })
+      console.log(32)
+      return await response.json()
+    } catch (error) {
+      console.error('Error saving user data:', error)
+      throw error
+    }
+  }
+
   // 注册
   const register = async (email: string, password: string) => {
     try {
       if (!$firebaseAuth) {
         throw new Error('Firebase auth is not initialized')
       }
-      console.log(23, $firebaseAuth)
-      const { user: newUser } = await createUserWithEmailAndPassword($firebaseAuth, email, password)
-      user.value = newUser
-      return newUser
+      const { user: firebaseUser } = await createUserWithEmailAndPassword($firebaseAuth, email, password)
+      const userData = await saveUserToRedis(firebaseUser)
+      user.value = { ...firebaseUser, userData }
+      return user.value
     } catch (error: any) {
       console.error('Registration error:', error.code, error.message)
-      throw error
-    }
-  }
-
-  // 登录
-  const login = async (email: string, password: string) => {
-    try {
-      const { user: authUser } = await signInWithEmailAndPassword($firebaseAuth, email, password)
-      user.value = authUser
-    } catch (error) {
-      console.error('Login error:', error)
-      throw error
-    }
-  }
-
-  // 登出
-  const signOut = async () => {
-    try {
-      await firebaseSignOut($firebaseAuth)
-      user.value = null
-    } catch (error) {
-      console.error('Logout error:', error)
       throw error
     }
   }
@@ -55,24 +58,24 @@ export const useAuth = () => {
   const loginWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider()
-      const { user: googleUser } = await signInWithPopup($firebaseAuth, provider)
-      user.value = googleUser
-      return googleUser
+      const { user: firebaseUser } = await signInWithPopup($firebaseAuth, provider)
+      const userData = await saveUserToRedis(firebaseUser)
+      user.value = { ...firebaseUser, userData }
+      return user.value
     } catch (error) {
       console.error('Google login error:', error)
       throw error
     }
   }
 
-  // Apple登录
-  const loginWithApple = async () => {
+  // 普通登录
+  const login = async (email: string, password: string) => {
     try {
-      const provider = new OAuthProvider('apple.com')
-      const { user: appleUser } = await signInWithPopup($firebaseAuth, provider)
-      user.value = appleUser
-      return appleUser
+      const { user: firebaseUser } = await signInWithEmailAndPassword($firebaseAuth, email, password)
+      const userData = await saveUserToRedis(firebaseUser)
+      user.value = { ...firebaseUser, userData }
     } catch (error) {
-      console.error('Apple login error:', error)
+      console.error('Login error:', error)
       throw error
     }
   }
@@ -80,11 +83,34 @@ export const useAuth = () => {
   // 匿名登录
   const loginAnonymously = async () => {
     try {
-      const { user: anonUser } = await signInAnonymously($firebaseAuth)
-      user.value = anonUser
-      return anonUser
+      const { user: firebaseUser } = await signInAnonymously($firebaseAuth)
+      const userData = await saveUserToRedis(firebaseUser)
+      user.value = { ...firebaseUser, userData }
+      return user.value
     } catch (error) {
       console.error('Anonymous login error:', error)
+      throw error
+    }
+  }
+
+  // 登出
+  const signOut = async () => {
+    try {
+      await firebaseSignOut($firebaseAuth)
+      if (user.value?.uid) {
+        await fetch('/api/users/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid: user.value.uid,
+          })
+        })
+      }
+      user.value = null
+    } catch (error) {
+      console.error('Logout error:', error)
       throw error
     }
   }
@@ -95,7 +121,6 @@ export const useAuth = () => {
     login,
     signOut,
     loginWithGoogle,
-    loginWithApple,
     loginAnonymously
   }
 } 
