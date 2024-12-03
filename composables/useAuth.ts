@@ -3,6 +3,10 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInAnonymously,
+  OAuthProvider,
 } from 'firebase/auth'
 
 export const useAuth = () => {
@@ -47,10 +51,51 @@ export const useAuth = () => {
     }
   }
 
+  // Google登录
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider()
+      const { user: googleUser } = await signInWithPopup($firebaseAuth, provider)
+      user.value = googleUser
+      return googleUser
+    } catch (error) {
+      console.error('Google login error:', error)
+      throw error
+    }
+  }
+
+  // Apple登录
+  const loginWithApple = async () => {
+    try {
+      const provider = new OAuthProvider('apple.com')
+      const { user: appleUser } = await signInWithPopup($firebaseAuth, provider)
+      user.value = appleUser
+      return appleUser
+    } catch (error) {
+      console.error('Apple login error:', error)
+      throw error
+    }
+  }
+
+  // 匿名登录
+  const loginAnonymously = async () => {
+    try {
+      const { user: anonUser } = await signInAnonymously($firebaseAuth)
+      user.value = anonUser
+      return anonUser
+    } catch (error) {
+      console.error('Anonymous login error:', error)
+      throw error
+    }
+  }
+
   return {
     user,
     register,
     login,
-    signOut
+    signOut,
+    loginWithGoogle,
+    loginWithApple,
+    loginAnonymously
   }
 } 
