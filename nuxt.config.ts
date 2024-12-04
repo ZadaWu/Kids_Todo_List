@@ -12,7 +12,11 @@ export default defineNuxtConfig({
         firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
         firebaseAppId: process.env.FIREBASE_APP_ID,
-        firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID
+        firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
+        mysqlHost: process.env.MYSQL_HOST,
+        mysqlUser: process.env.MYSQL_USER,
+        mysqlPassword: process.env.MYSQL_PASSWORD,
+        mysqlDatabase: process.env.MYSQL_DATABASE
     },
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
