@@ -14,8 +14,8 @@ onMounted(() => {
   const unsubscribe = onAuthStateChanged($firebaseAuth, async (firebaseUser) => {
     console.log('Firebase Auth State Changed:', firebaseUser)
     if (firebaseUser) {
-      userStore.setUser(firebaseUser)
       const token = await firebaseUser.getIdToken()
+      userStore.setUser(firebaseUser)
       userStore.setToken(token)
       // 如果在首页、登录页或注册页，重定向到 profile
       const currentPath = window.location.pathname

@@ -1,25 +1,15 @@
 import redis from '~/server/redis'
-import { adminAuth } from '~/server/utils/firebase-admin'
+import { verifyAuth } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   try {
-    console.log(1, 'adminAuth')
-    const authHeader = getHeader(event, 'authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw createError({
-        statusCode: 401,
-        message: 'No token provided'
-      })
-    }
+    // 验证并解析 token
+    await verifyAuth(event, { required: true, parseToken: true })
+    
+    // 现在可以从 context 中获取用户信息
+    const userId = event.context.auth?.uid
+    console.log('User ID:', userId)
 
-    const token = authHeader.split('Bearer ')[1]
-    console.log(2, token)
-    if (token && token !== ''){
-      const decodedToken = await adminAuth.verifyIdToken(token)
-      const userRecord = await adminAuth.getUser(decodedToken.uid)
-      console.log('User record:', userRecord)
-    }
-   
     await redis.set('test', 'Redis connection successful')
     const result = await redis.get('test')
     return { status: 'success', message: result }
