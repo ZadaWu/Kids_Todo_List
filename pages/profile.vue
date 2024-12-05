@@ -5,7 +5,7 @@
         <div class="flex justify-between h-16 items-center">
           <h1 class="text-xl font-bold">FamilyTodo</h1>
           <div class="flex items-center gap-4">
-            <span class="text-gray-600">{{ user?.email }}</span>
+            <span class="text-gray-600">{{ $user?.email }}</span>
             <button 
               @click="handleSignOut"
               class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
@@ -22,10 +22,10 @@
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center space-x-4">
             <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-100">
-              <template v-if="user?.photoURL">
+              <template v-if="$user?.photoURL">
                 <img 
-                  :src="user.photoURL" 
-                  :alt="user?.displayName"
+                  :src="$user.photoURL" 
+                  :alt="$user?.displayName"
                   class="w-full h-full object-cover"
                 >
               </template>
@@ -40,17 +40,17 @@
               </template>
             </div>
             <div>
-              <h1 class="text-2xl font-bold">{{ user?.displayName || '未设置昵称' }}</h1>
-              <p class="text-gray-600">{{ user?.email }}</p>
+              <h1 class="text-2xl font-bold">{{ $user?.displayName || '未设置昵称' }}</h1>
+              <p class="text-gray-600">{{ $user?.email }}</p>
             </div>
           </div>
 
           <div class="mt-8">
             <h2 class="text-lg font-semibold mb-4">账号信息</h2>
             <div class="space-y-2">
-              <p>登录方式: {{ user?.providerData[0]?.providerId || '未知' }}</p>
-              <p>账号创建时间: {{ user?.metadata?.creationTime }}</p>
-              <p>最后登录时间: {{ user?.metadata?.lastSignInTime }}</p>
+              <p>登录方式: {{ $user?.providerData[0]?.providerId || '未知' }}</p>
+              <p>账号创建时间: {{ $user?.metadata?.creationTime }}</p>
+              <p>最后登录时间: {{ $user?.metadata?.lastSignInTime }}</p>
             </div>
           </div>
         </div>
@@ -81,17 +81,22 @@ const handleSignOut = async () => {
   }
 }
 
-let redisTest = ref(null)
+const { $user, $token } = useNuxtApp()
+
+// 直接使用 $user
+console.log('Current user:', $user.value)
+
+// 在 API 请求中使用
+const redisTest = ref(null)
+
 watchEffect(async () => {
-console.log(50, token.value)
-  if (token.value) {
+  if ($token.value) {
     const { data } = await useFetch('/api/test-redis', {
       headers: {
-        'Authorization': `Bearer ${token.value}`
+        'Authorization': `Bearer ${$token.value}`
       }
     })
     redisTest.value = data.value
-    console.log(56, 'Redis test result:', redisTest.value)
   }
 })
 

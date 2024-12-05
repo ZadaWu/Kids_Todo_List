@@ -2,10 +2,23 @@ import redis from '~/server/redis'
 import { verifyAuth } from '~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
-  try {
-    // 验证并解析 token
-    await verifyAuth(event, { required: true, parseToken: true })
+  // 验证并解析 token
+  await verifyAuth(event, { required: true, parseToken: true })
     
+  const user = event.context.user
+  
+  
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      message: 'Unauthorized'
+    })
+  }
+
+  console.log('API accessed by user:', user.email)
+  
+  try {
+   
     // 现在可以从 context 中获取用户信息
     const userId = event.context.auth?.uid
     console.log('User ID:', userId)

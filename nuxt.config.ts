@@ -31,7 +31,8 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss'
   ],
   plugins: [
-    '~/plugins/firebase.ts'
+    '~/plugins/firebase.ts',
+    '~/plugins/user.ts'
   ],
   buildModules: [
     // 仅支持 Nuxt 2:
