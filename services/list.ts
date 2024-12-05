@@ -1,4 +1,4 @@
-import { useLists as useListsModel } from '@/model/list'
+import { useLists as useListsModel } from '@/model/listMysql'
 
 export const useListService = () => {
     const ListsModel = useListsModel();
@@ -14,7 +14,7 @@ export const useListService = () => {
 
     const addList = async ({name}: {name: string}) => {
         try {
-            return await ListsModel.addList({name})
+            return await ListsModel.addList({name, user_id: 1})
         } catch (error) {
             console.error('Error adding list:', error)
             throw error

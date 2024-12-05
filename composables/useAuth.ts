@@ -1,22 +1,22 @@
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
   signInWithPopup,
   signInAnonymously,
-  OAuthProvider,
 } from 'firebase/auth'
+import { useUserStore } from '~/state/userStore'
 
 export const useAuth = () => {
   const user = useState<any | null>('user', () => null)
   const { $firebaseAuth } = useNuxtApp()
+  const userStore = useUserStore()
   
   // 保存用户信息到 Redis (通过 API)
-  const saveUserToRedis = async (firebaseUser: any) => {
+  const saveUserToCache = async (firebaseUser: any) => {
     try {
-      console.log(31, 'saveUserToRedis')
+      console.log(31, 'saveUserToCache')
       const response = await fetch('/api/users/save', {
         method: 'POST',
         headers: {
@@ -45,7 +45,7 @@ export const useAuth = () => {
         throw new Error('Firebase auth is not initialized')
       }
       const { user: firebaseUser } = await createUserWithEmailAndPassword($firebaseAuth, email, password)
-      const userData = await saveUserToRedis(firebaseUser)
+      const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
       return user.value
     } catch (error: any) {
@@ -59,8 +59,9 @@ export const useAuth = () => {
     try {
       const provider = new GoogleAuthProvider()
       const { user: firebaseUser } = await signInWithPopup($firebaseAuth, provider)
-      const userData = await saveUserToRedis(firebaseUser)
+      const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
+      userStore.setUser(user.value)
       return user.value
     } catch (error) {
       console.error('Google login error:', error)
@@ -72,8 +73,9 @@ export const useAuth = () => {
   const login = async (email: string, password: string) => {
     try {
       const { user: firebaseUser } = await signInWithEmailAndPassword($firebaseAuth, email, password)
-      const userData = await saveUserToRedis(firebaseUser)
+      const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
+      userStore.setUser(user.value)
     } catch (error) {
       console.error('Login error:', error)
       throw error
@@ -84,7 +86,7 @@ export const useAuth = () => {
   const loginAnonymously = async () => {
     try {
       const { user: firebaseUser } = await signInAnonymously($firebaseAuth)
-      const userData = await saveUserToRedis(firebaseUser)
+      const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
       return user.value
     } catch (error) {

@@ -20,7 +20,7 @@ export const useTodos = () => {
   // 并更新到响应式的todos中
   const fetchTodos = async () => {
     const data = await getTodos();
-    todos.value = data;
+    todos.value = data as Todo[]; 
     return todos.value;
   };
 

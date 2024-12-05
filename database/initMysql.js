@@ -34,6 +34,40 @@ async function initDatabase() {
       );
     `);
 
+
+    // 创建清单表
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS lists (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        cover_image TEXT,
+        is_completed BOOLEAN DEFAULT FALSE,
+        is_archived BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_id (user_id)
+      );
+    `);
+
+
+    // 创建待办事项表
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS todos (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        list_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        is_completed BOOLEAN DEFAULT FALSE,
+        is_deleted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE,
+        INDEX idx_list_id (list_id)
+      );
+    `);
+    
     console.log('Database and tables created successfully!');
     await connection.end();
 

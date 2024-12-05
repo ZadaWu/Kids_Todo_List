@@ -18,6 +18,8 @@
     "dotenv": "^16.4.7",
     "firebase": "^11.0.2",
     "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "lru-cache": "^11.0.2",
     "mysql2": "^3.11.5",
     "nuxt": "^3.14.1592",
     "pinia": "^2.2.6",

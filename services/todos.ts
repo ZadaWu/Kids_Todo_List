@@ -1,4 +1,4 @@
-import { useTodos as useBaseTodos, type Todo } from '~/model/todos'
+import { useTodos as useBaseTodos, type Todo } from '~/model/todosMysql.js'
 
 // 是的,这是一个Vue的自定义Composition API Hook
 // 使用use前缀命名是Vue的约定,表示这是一个可复用的组合式函数
