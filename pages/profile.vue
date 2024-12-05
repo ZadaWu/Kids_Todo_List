@@ -45,4 +45,13 @@ import { useUserStore } from '~/state/userStore'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.getUser)
+const token = computed(() => userStore.getToken)
+
+const { data: redisTest } = await useFetch('/api/test-redis', {
+  headers: {
+    'Authorization': `Bearer ${token.value}`
+  }
+})
+
+console.log('Redis test result:', redisTest.value)
 </script>

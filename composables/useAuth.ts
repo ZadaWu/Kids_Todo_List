@@ -59,9 +59,11 @@ export const useAuth = () => {
     try {
       const provider = new GoogleAuthProvider()
       const { user: firebaseUser } = await signInWithPopup($firebaseAuth, provider)
+      const token = await firebaseUser.getIdToken()
       const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
       userStore.setUser(user.value)
+      userStore.setToken(token)
       return user.value
     } catch (error) {
       console.error('Google login error:', error)
@@ -73,9 +75,11 @@ export const useAuth = () => {
   const login = async (email: string, password: string) => {
     try {
       const { user: firebaseUser } = await signInWithEmailAndPassword($firebaseAuth, email, password)
+      const token = await firebaseUser.getIdToken()
       const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
       userStore.setUser(user.value)
+      userStore.setToken(token)
     } catch (error) {
       console.error('Login error:', error)
       throw error

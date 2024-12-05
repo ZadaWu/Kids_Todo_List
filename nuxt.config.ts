@@ -16,7 +16,10 @@ export default defineNuxtConfig({
         mysqlHost: process.env.MYSQL_HOST,
         mysqlUser: process.env.MYSQL_USER,
         mysqlPassword: process.env.MYSQL_PASSWORD,
-        mysqlDatabase: process.env.MYSQL_DATABASE
+        mysqlDatabase: process.env.MYSQL_DATABASE,
+        firebaseAdminProjectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+        firebaseAdminClientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+        firebaseAdminPrivateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY,
     },
     redis: {
       host: process.env.REDIS_HOST || 'localhost',

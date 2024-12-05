@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
   const { user } = useAuth()
 
   // 如果用户未登录且访问的不是登录/注册页面，重定向到登录页
