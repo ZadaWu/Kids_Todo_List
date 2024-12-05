@@ -76,6 +76,7 @@ export const useAuth = () => {
     try {
       const { user: firebaseUser } = await signInWithEmailAndPassword($firebaseAuth, email, password)
       const token = await firebaseUser.getIdToken()
+      console.log(70, token);
       const userData = await saveUserToCache(firebaseUser)
       user.value = { ...firebaseUser, userData }
       userStore.setUser(user.value)

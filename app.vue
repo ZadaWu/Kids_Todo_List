@@ -15,6 +15,8 @@ onMounted(() => {
     console.log('Firebase Auth State Changed:', firebaseUser)
     if (firebaseUser) {
       userStore.setUser(firebaseUser)
+      const token = await firebaseUser.getIdToken()
+      userStore.setToken(token)
       // 如果在首页、登录页或注册页，重定向到 profile
       const currentPath = window.location.pathname
       if (['/', '/login', '/register'].includes(currentPath)) {
@@ -22,6 +24,7 @@ onMounted(() => {
       }
     } else {
       userStore.setUser(null)
+      userStore.setToken(null)
       // 如果不在允许的页面，重定向到登录页
       const currentPath = window.location.pathname
       if (!['/login', '/register', '/'].includes(currentPath)) {

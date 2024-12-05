@@ -8,7 +8,6 @@ let app: App | undefined
 // 确保只初始化一次
 if (!getApps().length) {
   try {
-    console.log(11, config.public.firebaseAdminProjectId, config.public.firebaseAdminClientEmail, config.public.firebaseAdminPrivateKey)
     app = initializeApp({
       credential: cert({
         projectId: config.public.firebaseAdminProjectId,
