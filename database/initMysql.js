@@ -67,7 +67,29 @@ async function initDatabase() {
         INDEX idx_list_id (list_id)
       );
     `);
-    
+
+    // 添加 firebase_uid 字段到 lists 表
+    await connection.query(`
+      ALTER TABLE lists
+      ADD COLUMN firebase_uid VARCHAR(128) DEFAULT NULL,
+      ADD INDEX idx_firebase_uid (firebase_uid),
+      ADD CONSTRAINT fk_lists_firebase_uid 
+      FOREIGN KEY (firebase_uid) 
+      REFERENCES users(firebase_uid) 
+      ON DELETE CASCADE;
+    `);
+
+    // 添加 firebase_uid 字段到 todos 表
+    await connection.query(`
+      ALTER TABLE todos
+      ADD COLUMN firebase_uid VARCHAR(128) DEFAULT NULL,
+      ADD INDEX idx_firebase_uid (firebase_uid),
+      ADD CONSTRAINT fk_todos_firebase_uid 
+      FOREIGN KEY (firebase_uid) 
+      REFERENCES users(firebase_uid) 
+      ON DELETE CASCADE;
+    `);
+
     console.log('Database and tables created successfully!');
     await connection.end();
 
@@ -77,5 +99,66 @@ async function initDatabase() {
   }
 }
 
-// 改成可导出的方式，这样其他文件可以按需导入
-initDatabase();
+// 创建一个单独的函数来添加新字段
+async function addFirebaseUidColumns() {
+  try {
+    const connection = await mysql.createConnection({
+      host: process.env.MYSQL_HOST || 'localhost',
+      user: process.env.MYSQL_USER || 'root',
+      password: process.env.MYSQL_PASSWORD || '',
+      database: 'family_todo',
+      multipleStatements: true
+    });
+
+    // 检查列是否存在，如果不存在则添加
+    const addColumnIfNotExists = async (table, column) => {
+      const [columns] = await connection.query(
+        `SELECT COLUMN_NAME 
+         FROM INFORMATION_SCHEMA.COLUMNS 
+         WHERE TABLE_SCHEMA = 'family_todo' 
+         AND TABLE_NAME = ? 
+         AND COLUMN_NAME = ?`,
+        [table, column]
+      );
+      
+      if (!columns.length) {
+        await connection.query(`
+          ALTER TABLE ${table}
+          ADD COLUMN ${column} VARCHAR(128) DEFAULT NULL,
+          ADD INDEX idx_${column} (${column}),
+          ADD CONSTRAINT fk_${table}_${column}
+          FOREIGN KEY (${column}) 
+          REFERENCES users(firebase_uid) 
+          ON DELETE CASCADE;
+        `);
+        console.log(`Added ${column} to ${table}`);
+      } else {
+        console.log(`Column ${column} already exists in ${table}`);
+      }
+    };
+
+    // 添加列到两个表
+    await addColumnIfNotExists('lists', 'firebase_uid');
+    await addColumnIfNotExists('todos', 'firebase_uid');
+
+    console.log('Firebase UID columns check completed!');
+    await connection.end();
+
+  } catch (error) {
+    console.error('Error adding Firebase UID columns:', error);
+    process.exit(1);
+  }
+}
+
+// 导出函数供其他文件使用
+export { initDatabase, addFirebaseUidColumns };
+
+// 根据命令行参数执行不同的操作
+const command = process.argv[2];
+if (command === 'init') {
+  initDatabase();
+} else if (command === 'add-firebase-uid') {
+  addFirebaseUidColumns();
+} else {
+  console.log('Please specify a command: init or add-firebase-uid');
+}

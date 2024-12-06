@@ -9,10 +9,10 @@ export interface Todo {
 }
 
 export const useTodos = () => {
-  const getTodos = async () => {
+  const getTodos = async (uid: string) => {
     try {
       const mysql = await getMysqlClient()
-      const [rows] = await mysql.execute('SELECT * FROM todos')
+      const [rows] = await mysql.execute('SELECT * FROM todos WHERE list_id IN (SELECT id FROM lists WHERE firebase_uid = ?)', [uid])
       return rows as Todo[]
     } catch (error) {
       console.error('Error fetching todos:', error)

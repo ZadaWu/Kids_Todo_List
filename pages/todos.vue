@@ -2,18 +2,19 @@
   import EmptyList from "@/components/emptyList.vue";
   import Lists from "@/components/lists.vue";
   import AddList from "@/components/addList.vue";
-  import { useTodos } from '~/hooks/useTodos'
   import { useTodosStore } from '~/state/todosStore'
   import { storeToRefs } from 'pinia';
+  import { useTodoApi } from '~/apis/todoApi'
 
-
-  const { fetchTodos } = useTodos();
   const store = useTodosStore()
   const {todos: todosStore} = storeToRefs(store);
+  const { $user } = useNuxtApp()
 
-  onMounted(async () => {
-    const initTodos = await fetchTodos();
-    store.setTodos(initTodos);
+  watchEffect(async () => {
+    if ($user.value) {
+      const initTodos = await useTodoApi().getTodos($user.value.uid);
+      store.setTodos(initTodos);
+    }
   })
 </script>
 

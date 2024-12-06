@@ -83,9 +83,6 @@ const handleSignOut = async () => {
 
 const { $user, $token } = useNuxtApp()
 
-// 直接使用 $user
-console.log('Current user:', $user.value)
-
 // 在 API 请求中使用
 const redisTest = ref(null)
 
@@ -97,6 +94,9 @@ watchEffect(async () => {
       }
     })
     redisTest.value = data.value
+
+    // 直接使用 $user
+    console.log(87, 'Current user:', $user.value)
   }
 })
 

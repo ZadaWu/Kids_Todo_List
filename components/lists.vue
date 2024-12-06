@@ -1,17 +1,19 @@
 <script setup>
 import { useListsStore } from '@/state/listsStore'
-import { useListService } from '@/services/list'
 import TodoList from './todoList.vue'
 import AddTodos from './addTodos.vue'
+import { useListApi } from '@/apis/listApi'
+
+const { $user } = useNuxtApp()
 const listsStore = useListsStore()
-const listService = useListService()
 
-
-onMounted(async () => {
-    listsStore.setLists(await listService.getLists())
+watchEffect(async () => {
+    if ($user && $user.value) {
+        const { getLists } = useListApi()
+        listsStore.setLists(await getLists($user.value.uid))
+        console.log(31, listsStore.getLists)
+    }
 })
-
-
 </script>
 
 <template>
@@ -23,7 +25,7 @@ onMounted(async () => {
                 <h1 class="mb-2 text-2xl font-bold">{{ list?.name }} 📝</h1>
             </div>
             <AddTodos :listId="list?.id" />
-            <TodoList :listId="list?.id" :listName="list?.name" />
+            <!-- <TodoList :listId="list?.id" :listName="list?.name" /> -->
         </div>
     </div>
 </template>

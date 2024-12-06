@@ -1,6 +1,4 @@
 import { ref } from "vue";
-import { useTodos as useBaseTodos } from "~/services/todos";
-
 
 interface Todo {
   id: number;
@@ -14,12 +12,17 @@ export const useTodos = () => {
   const todos = ref<Todo[]>([]);
 
   // 从services层获取getTodos方法
-  const { getTodos } = useBaseTodos();
+  const getTodos = async (uid: string) => {
+    const { data } = await useFetch(`/api/todos?firebaseUid=${uid}`, {
+      method: 'GET'
+    })
+    return data.value?.data || []
+  }
 
   // fetchTodos函数用于从后端获取最新的todos数据
   // 并更新到响应式的todos中
-  const fetchTodos = async () => {
-    const data = await getTodos();
+  const fetchTodos = async (uid: string) => {
+    const data = await getTodos(uid);
     todos.value = data as Todo[]; 
     return todos.value;
   };

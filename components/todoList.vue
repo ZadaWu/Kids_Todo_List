@@ -5,12 +5,10 @@
 </template>
 
 <script setup>
-    import { storeToRefs } from 'pinia'
-    import { useTodosStore } from '~/state/todosStore'
-    import { useTodos as useTodosService } from  '~/services/todos'
-    import { doc } from 'firebase/firestore'
-    import { useNuxtApp } from '#app'
-
+    // import { storeToRefs } from 'pinia'
+    // import { useTodosStore } from '~/state/todosStore'
+    import { useTodoApi } from '~/apis/todoApi'
+    import Todo from './todo.vue';
 
     const props = defineProps({
         listId: {
@@ -23,24 +21,22 @@
         }
     })
 
-    const todosService = useTodosService();
     
-    import Todo from './todo.vue';
+    
 
-    const store = useTodosStore()
-    const {todos} = storeToRefs(store);
+    // const store = useTodosStore()
+    // const {todos} = storeToRefs(store);
     
-    const oneListTodos = computed(() => {
-        const { $firebaseDb: db } = useNuxtApp()
-        // 创建对 lists collection 中特定文档的引用
-        const listRef = doc(db, 'lists', props.listId.toString())
-        return todos.value.filter((todo) => {
-            // 比较引用对象
-            return todo.list_id?.path === listRef.path
-        })
+    const { getTodosByListId } = useTodoApi()
+    const oneListTodos = ref([])
+
+    watchEffect(async () => {
+        if (props.listId > 0) {
+            oneListTodos.value = await getTodosByListId(props.listId)
+            console.log('oneListTodos', oneListTodos.value);
+        }
     })
 
-    console.log('oneListTodos', oneListTodos.value);
     const handleUpdateCompleted = async (id, completed) => {
         store.completeTodo(id, completed);
         try {

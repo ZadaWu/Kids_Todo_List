@@ -1,18 +1,36 @@
 import { getMysqlClient } from '@/lib/mysql'
 
 export interface List {
-    id: number  // MySQL 使用 number 类型的 ID
+    id: number
     name: string
     created_at: Date
     user_id: number
 }
 
 export const useLists = () => {
-    const getLists = async () => {
+    const getLists = async (firebaseUid: string) => {
         try {
             const db = await getMysqlClient()
-            const [rows] = await db.query('SELECT * FROM lists WHERE is_archived = FALSE')
-            return (rows as any[]).map(row => ({
+            
+            // 先通过 firebase_uid 查询用户 ID
+            const [userRows] = await db.query(
+                'SELECT id FROM users WHERE firebase_uid = ?', 
+                [firebaseUid]
+            )
+            
+            if (!(userRows as any[]).length) {
+                throw new Error('User not found')
+            }
+            
+            const userId = (userRows as any[])[0].id
+
+            // 使用用户 ID 查询列表
+            const [listRows] = await db.query(
+                'SELECT * FROM lists WHERE is_archived = FALSE AND user_id = ?', 
+                [userId]
+            )
+
+            return (listRows as any[]).map(row => ({
                 id: row.id,
                 name: row.name,
                 created_at: new Date(row.created_at),
@@ -24,19 +42,47 @@ export const useLists = () => {
         }
     }
 
-    const addList = async ({ name, user_id }: { name: string, user_id: number }) => {
+    const getList = async (id: number) => {
         try {
             const db = await getMysqlClient()
+            const [listRows] = await db.query(
+                'SELECT * FROM lists WHERE id = ?', 
+                [id]
+            )
+            return (listRows as any[])[0] as List
+        } catch (error) {
+            console.error('Error fetching list:', error)
+            throw error
+        }
+    }
+
+    const addList = async ({ name, firebaseUid }: { name: string, firebaseUid: string }) => {
+        try {
+            const db = await getMysqlClient()
+            
+            // 先查询用户 ID
+            const [userRows] = await db.query(
+                'SELECT id FROM users WHERE firebase_uid = ?', 
+                [firebaseUid]
+            )
+            
+            if (!(userRows as any[]).length) {
+                throw new Error('User not found')
+            }
+            
+            const userId = (userRows as any[])[0].id
+
+            // 使用用户 ID 创建列表
             const [result] = await db.query(
                 'INSERT INTO lists (name, user_id) VALUES (?, ?)',
-                [name, user_id]
+                [name, userId]
             )
             
             return {
                 id: (result as any).insertId,
                 name,
                 created_at: new Date(),
-                user_id
+                user_id: userId
             } as List
         } catch (error) {
             console.error('Error adding list:', error)
@@ -84,6 +130,7 @@ export const useLists = () => {
     }
 
     return {
+        getList,
         getLists,
         addList,
         deleteList,

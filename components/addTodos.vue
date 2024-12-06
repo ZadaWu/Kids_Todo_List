@@ -2,9 +2,8 @@
 import { ref } from 'vue';
 import { useTodosStore } from '~/state/todosStore'
 import VoiceInput from './VoiceInput.vue'
-import { useTodos as useTodosService } from '~/services/todos'
+import { useTodoApi } from '~/apis/todoApi'
 
-const todosService = useTodosService();
 const title = ref('');
 const props = defineProps({
     listId: {
@@ -25,7 +24,7 @@ const addTodo = async () => {
     }
     useTodosStore().addTodo(newTodo);
     try {
-        await todosService.addTodo(newTodo);
+        await useTodoApi().addTodo(newTodo);
         title.value = '';
     } catch (error) {
         await useTodosStore().removeTodo(newTodo.id);

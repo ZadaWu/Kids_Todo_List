@@ -1,9 +1,8 @@
 <script setup>
-import { useListService } from '@/services/list'
 import { useListsStore } from '@/state/listsStore'
 import Modal from './modal.vue'
 import { notification } from '~/composables/notification'
-const listService = useListService()    
+import { useListApi } from '~/apis/listApi'
 const listsStore = useListsStore()
 const isAddListModalOpen = ref(false)
 const newListName = ref('')
@@ -13,7 +12,7 @@ const addList = async (listName) => {
     listName = listName || 'New List'
     try {
         listsStore.addList({name: listName})
-        await listService.addList({name: listName})
+        await useListApi().addList({name: listName})
         isAddListModalOpen.value = false
         notification.show({
             type: 'success',
