@@ -1,4 +1,4 @@
-import redis from '~/server/redis'
+import redis, { publisher } from '~/server/redis'
 import { cacheManager } from '~/lib/cache'
 
 interface CacheOptions {

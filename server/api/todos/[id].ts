@@ -1,5 +1,5 @@
 import { useTodos } from '~/model/todosMysql'
-
+import { getCacheQueue } from '~/server/runtime/cacheQueue'
 export default defineEventHandler(async (event) => {
   await verifyAuth(event, { required: true, parseToken: true })
 
@@ -23,6 +23,14 @@ export default defineEventHandler(async (event) => {
 
   // DELETE /api/todos/[id] - 删除todo
   if (event.method === 'DELETE') {
+    const cacheQueue = getCacheQueue()
+    cacheQueue.publishCacheInvalidation({
+      operation: 'delete',
+      table: 'todos',
+      id: id,
+      memCacheName: 'todosMemCache',
+      redisKeyPrefix: 'todos'
+    })
     return await todosModel.deleteTodo(id)
   }
 

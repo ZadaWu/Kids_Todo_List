@@ -24,6 +24,8 @@ export default defineNuxtConfig({
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || 6379,
+      pubSubHost: process.env.REDIS_PUBSUB_HOST || 'localhost',
+      pubSubPort: process.env.REDIS_PUBSUB_PORT || 6379,
     },
   },
   modules: [

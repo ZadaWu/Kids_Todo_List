@@ -8,7 +8,8 @@
     "debug": "nuxt dev --inspect",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "cache:clear": "node --loader ts-node/esm scripts/invalidateCache.mts"
   },
   "dependencies": {
     "@iconify/vue": "^4.1.2",
