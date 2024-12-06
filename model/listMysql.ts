@@ -4,7 +4,7 @@ export interface List {
     id: number
     name: string
     created_at: Date
-    user_id: number
+    user_id: string
 }
 
 export const useLists = () => {
@@ -59,30 +59,18 @@ export const useLists = () => {
     const addList = async ({ name, firebaseUid }: { name: string, firebaseUid: string }) => {
         try {
             const db = await getMysqlClient()
-            
-            // 先查询用户 ID
-            const [userRows] = await db.query(
-                'SELECT id FROM users WHERE firebase_uid = ?', 
-                [firebaseUid]
-            )
-            
-            if (!(userRows as any[]).length) {
-                throw new Error('User not found')
-            }
-            
-            const userId = (userRows as any[])[0].id
-
+        
             // 使用用户 ID 创建列表
             const [result] = await db.query(
-                'INSERT INTO lists (name, user_id) VALUES (?, ?)',
-                [name, userId]
+                'INSERT INTO lists (name, firebaseUid) VALUES (?, ?)',
+                [name, firebaseUid]
             )
             
             return {
                 id: (result as any).insertId,
                 name,
                 created_at: new Date(),
-                user_id: userId
+                user_id: firebaseUid
             } as List
         } catch (error) {
             console.error('Error adding list:', error)

@@ -3,7 +3,7 @@ import type { Todo } from '~/model/todosMysql'
 
 export const useTodoApi = () => {
   const getTodos = async (uid: string) => {
-    const { $token } = useNuxtApp()
+    const { $token, $user } = useNuxtApp()
     const { data } = await useFetch<{ data: Todo[] }>('/api/todos', {
       query: { uid },
       headers: {
@@ -24,10 +24,10 @@ export const useTodoApi = () => {
   }
 
   const addTodo = async (todo: Partial<Todo>) => {
-    const { $token } = useNuxtApp()
+    const { $token, $user } = useNuxtApp()
     const { data } = await useFetch<{ data: Todo }>('/api/todos', {
       method: 'POST',
-      body: todo,
+      body: {...todo, firebaseUid: $user?.value?.uid},
       headers: {
         'Authorization': `Bearer ${$token.value}`
       }

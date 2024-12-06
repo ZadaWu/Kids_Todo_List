@@ -27,7 +27,8 @@ export default defineEventHandler(async (event) => {
       title: body.title,
       is_completed: false,
       created_at: new Date(),
-      list_id: body.list_id
+      list_id: body.list_id,
+      firebaseUid: body.firebaseUid
     })
   }
 })

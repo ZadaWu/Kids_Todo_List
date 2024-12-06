@@ -1,4 +1,8 @@
 import { useLists } from '~/model/listMysql'
+import redis from '~/server/redis'
+import { cacheManager } from '~/lib/cache'
+
+const listsMemCache = cacheManager.createCache('ListsMemCache');
 
 export default defineEventHandler(async (event) => {
   await verifyAuth(event, { required: true, parseToken: true })
@@ -20,7 +24,6 @@ export default defineEventHandler(async (event) => {
     try {
       const query = getQuery(event)
       const firebaseUid = query.firebaseUid as string
-
       if (!firebaseUid) {
         throw createError({
           statusCode: 400,
@@ -28,7 +31,38 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      const items = await lists.getLists(firebaseUid)
+      // Try memory cache first
+      let items = listsMemCache.get(`lists:${firebaseUid}`)
+
+      console.log(38, 'items:', items)
+      
+      if (!items) {
+        // Try Redis if not in memory cache
+        items = await redis.hgetall(`lists:${firebaseUid}`)
+        
+        if (!items || Object.keys(items).length === 0) {
+          // Query database if not in Redis
+          items = await lists.getLists(firebaseUid)
+          
+          // Store results in both caches
+          listsMemCache.set(`lists:${firebaseUid}`, items)
+          
+          // Convert items array to hash for Redis
+          const itemsHash = items.reduce((acc: any, item: any) => {
+            acc[item.id] = JSON.stringify(item)
+            return acc
+          }, {})
+          
+          // Store in Redis as hash
+          await redis.hmset(`lists:${firebaseUid}`, itemsHash)
+        } else {
+          // Convert Redis string values back to objects
+          items = Object.entries(items).reduce((acc: any, [key, value]) => {
+            acc[key] = JSON.parse(value as string)
+            return acc
+          }, {})
+        }
+      }
 
       return {
         code: 200,

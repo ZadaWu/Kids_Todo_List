@@ -3,6 +3,7 @@ import { useListsStore } from '@/state/listsStore'
 import Modal from './modal.vue'
 import { notification } from '~/composables/notification'
 import { useListApi } from '~/apis/listApi'
+const { $user } = useNuxtApp()
 const listsStore = useListsStore()
 const isAddListModalOpen = ref(false)
 const newListName = ref('')
@@ -11,8 +12,8 @@ const addList = async (listName) => {
     console.log(12, listName)
     listName = listName || 'New List'
     try {
-        listsStore.addList({name: listName})
-        await useListApi().addList({name: listName})
+        listsStore.addList({name: listName, firebaseUid: $user.value.uid})
+        await useListApi().addList({name: listName, firebaseUid: $user.value.uid})
         isAddListModalOpen.value = false
         notification.show({
             type: 'success',
@@ -41,7 +42,7 @@ const openAddListModal = () => {
         <Modal :show="isAddListModalOpen" @close="isAddListModalOpen = false">
             <div>
                 <div><input type="text" class="rounded-md border border-gray-300 px-4 py-2 focus:border-red-400 focus:outline-none" v-model="newListName" placeholder="Add your list name" /></div>
-                <div class="mt-4"><button class="bg-blue-500 text-white px-4 py-2 rounded-md" @click="addList(newListName.value)">create</button></div>
+                <div class="mt-4"><button class="bg-blue-500 text-white px-4 py-2 rounded-md" @click="addList(newListName)">create</button></div>
             </div>
         </Modal>
     </div>

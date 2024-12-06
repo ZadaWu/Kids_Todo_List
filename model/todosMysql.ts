@@ -20,17 +20,18 @@ export const useTodos = () => {
     }
   }
 
-  const addTodo = async ({ title, is_completed, created_at, list_id }: { 
+  const addTodo = async ({ title, is_completed, created_at, list_id, firebaseUid }: { 
     title: string, 
     is_completed: boolean, 
     created_at: Date,
-    list_id: number 
+    list_id: number,
+    firebaseUid: string
   }) => {
     try {
       const mysql = await getMysqlClient()
       const [result] = await mysql.execute(
-        'INSERT INTO todos (title, is_completed, created_at, list_id) VALUES (?, ?, ?, ?)',
-        [title, is_completed, created_at, list_id]
+        'INSERT INTO todos (title, is_completed, created_at, list_id, firebase_uid) VALUES (?, ?, ?, ?, ?)',
+        [title, is_completed, created_at, list_id, firebaseUid ]
       )
       const insertId = (result as any).insertId
       return {
@@ -38,7 +39,8 @@ export const useTodos = () => {
         title,
         is_completed,
         created_at,
-        list_id
+        list_id,
+        firebaseUid
       } as Todo
     } catch (error) {
       console.error('Error adding todo:', error)

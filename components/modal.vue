@@ -8,8 +8,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const handleBackdropClick = () => {
-    if(props.show && e.target === e.currentTarget) {
+const handleBackdropClick = (e) => {
+    if(props.show && e?.target === e?.currentTarget) {
         emit('close')
     }
 }
@@ -18,7 +18,7 @@ const handleBackdropClick = () => {
 <template>
     <!-- 模态框背景遮罩 -->
     <div v-if="show" 
-         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
          @click="handleBackdropClick">
         <!-- 模态框主体 -->
         <div class="bg-white rounded-lg p-6 w-[400px] relative">
