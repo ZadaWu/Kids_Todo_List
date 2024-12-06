@@ -1,13 +1,9 @@
 import { useLists } from '~/model/listMysql'
-import redis from '~/server/redis'
-import { cacheManager } from '~/lib/cache'
-
-const listsMemCache = cacheManager.createCache('ListsMemCache');
+import { useLayeredCache } from '~/utils/cacheManager'
 
 export default defineEventHandler(async (event) => {
   await verifyAuth(event, { required: true, parseToken: true })
   const user = event.context.user
-  
   
   if (!user) {
     throw createError({
@@ -18,6 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const method = getMethod(event)
   const lists = useLists()
+  const { getFromCache, invalidateCache } = useLayeredCache()
 
   // GET - 获取列表
   if (method === 'GET') {
@@ -31,42 +28,19 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      // Try memory cache first
-      let items = listsMemCache.get(`lists:${firebaseUid}`)
-
-      console.log(38, 'items:', items)
-      
-      if (!items) {
-        // Try Redis if not in memory cache
-        items = await redis.hgetall(`lists:${firebaseUid}`)
-        
-        if (!items || Object.keys(items).length === 0) {
-          // Query database if not in Redis
-          items = await lists.getLists(firebaseUid)
-          
-          // Store results in both caches
-          listsMemCache.set(`lists:${firebaseUid}`, items)
-          
-          // Convert items array to hash for Redis
-          const itemsHash = items.reduce((acc: any, item: any) => {
-            acc[item.id] = JSON.stringify(item)
-            return acc
-          }, {})
-          
-          // Store in Redis as hash
-          await redis.hmset(`lists:${firebaseUid}`, itemsHash)
-        } else {
-          // Convert Redis string values back to objects
-          items = Object.entries(items).reduce((acc: any, [key, value]) => {
-            acc[key] = JSON.parse(value as string)
-            return acc
-          }, {})
+      const data = await getFromCache(
+        firebaseUid,
+        () => lists.getLists(firebaseUid),
+        {
+          memCacheName: 'ListsMemCache',
+          redisKeyPrefix: 'lists',
+          ttl: 3600 // 1小时过期
         }
-      }
+      )
 
       return {
         code: 200,
-        data: items,
+        data,
         message: 'success'
       }
     } catch (error) {
@@ -82,7 +56,6 @@ export default defineEventHandler(async (event) => {
     try {
       const body = await readBody(event)
       
-      // 数据验证
       if (!body.name || !body.firebaseUid) {
         throw createError({
           statusCode: 400,
@@ -90,10 +63,12 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      // 创建记录
-      const newItem = await lists.addList({
-        name: body.name,
-        firebaseUid: body.firebaseUid
+      const newItem = await lists.addList(body)
+
+      // 清除缓存
+      await invalidateCache(body.firebaseUid, {
+        memCacheName: 'ListsMemCache',
+        redisKeyPrefix: 'lists'
       })
 
       return {
